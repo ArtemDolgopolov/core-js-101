@@ -20,9 +20,14 @@
  *    console.log(r.height);      // => 20
  *    console.log(r.getArea());   // => 200
  */
-function Rectangle(/* width, height */) {
-  throw new Error('Not implemented');
+function Rectangle(width, height) {
+  this.width = width;
+  this.height = height;
 }
+
+Rectangle.prototype.getArea = function d() {
+  return this.width * this.height;
+};
 
 
 /**
@@ -35,8 +40,8 @@ function Rectangle(/* width, height */) {
  *    [1,2,3]   =>  '[1,2,3]'
  *    { width: 10, height : 20 } => '{"height":10,"width":20}'
  */
-function getJSON(/* obj */) {
-  throw new Error('Not implemented');
+function getJSON(obj) {
+  return JSON.stringify(obj);
 }
 
 
@@ -51,8 +56,17 @@ function getJSON(/* obj */) {
  *    const r = fromJSON(Circle.prototype, '{"radius":10}');
  *
  */
-function fromJSON(/* proto, json */) {
-  throw new Error('Not implemented');
+function fromJSON(proto, json) {
+  const obj = Object.create(proto);
+  const data = JSON.parse(json);
+
+  Object.keys(data).forEach((key) => {
+    if (Object.prototype.hasOwnProperty.call(data, key)) {
+      obj[key] = data[key];
+    }
+  });
+
+  return obj;
 }
 
 
@@ -110,33 +124,120 @@ function fromJSON(/* proto, json */) {
  *  For more examples see unit tests.
  */
 
+class CSSSelector {
+  constructor() {
+    this.selector = '';
+    this.hasElement = false;
+    this.hasId = false;
+    this.hasPseudoElement = false;
+  }
+
+  element(value) {
+    const newSelector = new CSSSelector();
+    newSelector.selector = this.selector + value;
+    newSelector.hasElement = true;
+    newSelector.hasId = this.hasId;
+    newSelector.hasPseudoElement = this.hasPseudoElement;
+    return newSelector;
+  }
+
+  id(value) {
+    const newSelector = new CSSSelector();
+    newSelector.selector = `${this.selector}#${value}`;
+    newSelector.hasElement = this.hasElement;
+    newSelector.hasId = true;
+    newSelector.hasPseudoElement = this.hasPseudoElement;
+    return newSelector;
+  }
+
+  class(value) {
+    const newSelector = new CSSSelector();
+    newSelector.selector = `${this.selector}.${value}`;
+    newSelector.hasElement = this.hasElement;
+    newSelector.hasId = this.hasId;
+    newSelector.hasPseudoElement = this.hasPseudoElement;
+    return newSelector;
+  }
+
+  attr(value) {
+    const newSelector = new CSSSelector();
+    newSelector.selector = `${this.selector}[${value}]`;
+    newSelector.hasElement = this.hasElement;
+    newSelector.hasId = this.hasId;
+    newSelector.hasPseudoElement = this.hasPseudoElement;
+    return newSelector;
+  }
+
+  pseudoClass(value) {
+    const newSelector = new CSSSelector();
+    newSelector.selector = `${this.selector}:${value}`;
+    newSelector.hasElement = this.hasElement;
+    newSelector.hasId = this.hasId;
+    newSelector.hasPseudoElement = this.hasPseudoElement;
+    return newSelector;
+  }
+
+  pseudoElement(value) {
+    const newSelector = new CSSSelector();
+    newSelector.selector = `${this.selector}::${value}`;
+    newSelector.hasElement = this.hasElement;
+    newSelector.hasId = this.hasId;
+    newSelector.hasPseudoElement = true;
+    return newSelector;
+  }
+
+  combine(combinator, selector2) {
+    const newSelector = new CSSSelector();
+    newSelector.selector = `${this.selector} ${combinator} ${selector2.selector}`;
+    newSelector.hasElement = this.hasElement || selector2.hasElement;
+    newSelector.hasId = this.hasId || selector2.hasId;
+    newSelector.hasPseudoElement = this.hasPseudoElement || selector2.hasPseudoElement;
+    return newSelector;
+  }
+
+  stringify() {
+    if ((this.hasElement && this.selector.match(/\w+/g).length > 1)
+    || (this.hasId && this.selector.match(/#/g).length > 1)
+    || (this.hasPseudoElement && this.selector.match(/::/g).length > 1)) {
+      throw new Error('Element, id and pseudo-element should not occur more than once inside the selector');
+    }
+    return this.selector;
+  }
+}
+
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  element(value) {
+    const selector = new CSSSelector();
+    return selector.element(value);
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    const selector = new CSSSelector();
+    return selector.id(value);
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    const selector = new CSSSelector();
+    return selector.class(value);
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    const selector = new CSSSelector();
+    return selector.attr(value);
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    const selector = new CSSSelector();
+    return selector.pseudoClass(value);
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    const selector = new CSSSelector();
+    return selector.pseudoElement(value);
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    return selector1.combine(combinator, selector2);
   },
 };
 
